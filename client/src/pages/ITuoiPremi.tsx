@@ -16,14 +16,13 @@ export default function ITuoiPremi() {
     <div className="px-5 pt-6 space-y-6">
       <h1 className="font-display font-bold text-lg">Il tuo premio</h1>
 
-      <div className="border-2 border-dashed border-primary rounded-lg p-6 text-center">
+      <div className="relative bg-surface-card rounded-xl border-2 border-dashed border-primary p-6 text-center">
         <p className="font-mono text-xs text-secondary uppercase tracking-wide">Sconto attivo</p>
         <p className="font-display font-extrabold text-3xl text-primary">{sconto}% OFF</p>
         <p className="text-sm text-on-surface-variant mt-2">
           Presenta questo codice in un negozio partner per riscattare lo sconto cumulativo.
         </p>
-        {/* TODO: generare QR reale del codice sconto, es. libreria qrcode.react */}
-        <div className="mt-4 h-40 bg-surface-container-highest rounded-md mx-auto flex items-center justify-center">
+        <div className="mt-4 h-40 bg-surface-container-highest rounded-md mx-auto flex items-center justify-center text-on-surface-variant text-sm">
           QR sconto
         </div>
       </div>

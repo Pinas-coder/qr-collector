@@ -16,25 +16,35 @@ export default function Dashboard() {
   return (
     <div className="px-5 pt-6 space-y-6">
       <header className="flex items-center justify-between">
-        <span className="font-display font-bold text-primary">
+        <h1 className="font-display font-bold text-primary text-lg">
           Explorer Level {profilo?.livelloEsploratore ?? "–"}
-        </span>
+        </h1>
         <span className="material-symbols-outlined text-primary">military_tech</span>
       </header>
 
-      <section className="bg-surface-card rounded-lg p-4 shadow-sm">
-        <p className="font-mono text-xs tracking-wide text-secondary uppercase">Obiettivo attuale</p>
-        <p className="font-display font-bold text-lg">Sconto {scontoAttuale}%</p>
-        <div className="mt-2 h-2 rounded-full bg-surface-container-highest overflow-hidden flex gap-1">
+      <section className="bg-surface-card rounded-xl p-4 shadow-sm border border-surface-container-low">
+        <div className="flex justify-between items-end mb-3">
+          <div>
+            <p className="font-mono text-xs tracking-wide text-secondary uppercase">Obiettivo attuale</p>
+            <h2 className="font-display font-bold text-lg">Sconto {scontoAttuale}%</h2>
+          </div>
+          <span className="font-display font-extrabold text-3xl text-primary">
+            {qrRaccolti}
+            <span className="text-outline-variant text-lg">/13</span>
+          </span>
+        </div>
+        <div className="h-3 rounded-full bg-surface-container-highest overflow-hidden">
           <div
             className="h-full bg-secondary-container rounded-full transition-all"
-            style={{ width: `${Math.min(qrRaccolti * 10, 100)}%` }}
+            style={{ width: `${Math.min((qrRaccolti / 13) * 100, 100)}%` }}
           />
         </div>
       </section>
 
       <section>
-        <h2 className="font-display font-semibold mb-2">Curiosità nelle vicinanze</h2>
+        <div className="flex justify-between items-center mb-3">
+          <h2 className="font-display font-semibold">Curiosità nelle vicinanze</h2>
+        </div>
         <p className="text-sm text-on-surface-variant">
           Scansiona un QR per sbloccare la prossima curiosità.
         </p>
