@@ -1,0 +1,25 @@
+{
+  "puntiInteresse": [
+    {
+      "id": "poi-1",
+      "nome": "Il pozzo sacro",
+      "categoria": "Storia",
+      "lat": 38.9989,
+      "lng": 16.5033,
+      "curiosita": "Costruito nell'età nuragica, veniva usato per riti legati al culto dell'acqua.",
+      "fotoEsclusivaUrl": "/foto/pozzo-sacro.jpg",
+      "qrToken": "TREK-QR-0001"
+    },
+    {
+      "id": "poi-2",
+      "nome": "La statua sussurrante",
+      "categoria": "Cultura",
+      "lat": 38.9995,
+      "lng": 16.504,
+      "curiosita": "La leggenda vuole che sussurrandole un desiderio all'orecchio si avveri entro un anno.",
+      "fotoEsclusivaUrl": "/foto/statua.jpg",
+      "qrToken": "TREK-QR-0002"
+    }
+  ],
+  "scansioni": []
+}

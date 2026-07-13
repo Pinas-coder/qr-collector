@@ -1,0 +1,16 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body, #root {
+  height: 100%;
+}
+
+/* Contenitore app: mobile-first, max 768px anche su desktop come da DESIGN.md */
+.app-shell {
+  max-width: 768px;
+  margin-inline: auto;
+  min-height: 100vh;
+  position: relative;
+  padding-bottom: 72px; /* spazio per la bottom nav */
+}
