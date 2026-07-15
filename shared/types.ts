@@ -47,3 +47,14 @@ export function calcolaSconto(numeroQrRaccolti: number): number {
   }
   return sconto;
 }
+export interface PuntoInteresse {
+  id: string;
+  nome: string;
+  categoria: CategoriaPOI;
+  lat: number;
+  lng: number;
+  curiosita: string;
+  fotoEsclusivaUrl: string;
+  qrToken: string;
+  raggioMetri?: number; // default 100 se assente
+}

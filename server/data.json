@@ -21,5 +21,11 @@
       "qrToken": "TREK-QR-0002"
     }
   ],
-  "scansioni": []
+  "scansioni": [
+    {
+      "utenteId": "b57563b6-526c-41a8-aac5-bc645ac6655e",
+      "poiId": "poi-1",
+      "scansionatoIl": "2026-07-15T11:12:20.790Z"
+    }
+  ]
 }

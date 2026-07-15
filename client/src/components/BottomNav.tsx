@@ -1,11 +1,5 @@
 import { NavLink, useNavigate } from "react-router-dom";
 
-const tabs = [
-  { to: "/mappa", label: "Mappa", icon: "map" },
-  { to: "/premi", label: "Premi", icon: "military_tech" },
-  { to: "/", label: "Profilo", icon: "person" }
-];
-
 export default function BottomNav() {
   const navigate = useNavigate();
 
@@ -34,7 +28,6 @@ export default function BottomNav() {
           Mappa
         </NavLink>
 
-        {/* spazio invisibile per il FAB */}
         <div className="w-16" />
 
         <NavLink

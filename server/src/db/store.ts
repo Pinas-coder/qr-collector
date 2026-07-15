@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const DATA_FILE = path.join(__dirname, "../../data.json");
 
+// server/src/db/store.ts
 interface PoiRecord {
   id: string;
   nome: string;
@@ -14,6 +15,7 @@ interface PoiRecord {
   curiosita: string;
   fotoEsclusivaUrl: string;
   qrToken: string;
+  raggioMetri?: number; // <-- aggiungi questa riga
 }
 
 interface ScanRecord {
