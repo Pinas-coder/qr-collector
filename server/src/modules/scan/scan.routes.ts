@@ -32,7 +32,10 @@ scanRouter.post("/", (req, res) => {
     });
   }
 
-  registraScansione(req.utenteId, poi.id);
+  const registrata = registraScansione(req.utenteId, poi.id);
+  if (!registrata) {
+    return res.status(409).json({ errore: "Questo QR è già stato scansionato" });
+  }
   const totale = getScansioniUtente(req.utenteId).length;
 
   const { qrToken: _omesso, ...poiSenzaToken } = poi;

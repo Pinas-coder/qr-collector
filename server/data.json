@@ -7,7 +7,7 @@
       "lat": 38.9989,
       "lng": 16.5033,
       "curiosita": "Costruito nell'età nuragica, veniva usato per riti legati al culto dell'acqua.",
-      "fotoEsclusivaUrl": "/foto/pozzo-sacro.jpg",
+      "fotoEsclusivaUrl": "/foto/pozzo-sacro.png",
       "qrToken": "TREK-QR-0001"
     },
     {
@@ -17,7 +17,7 @@
       "lat": 38.9995,
       "lng": 16.504,
       "curiosita": "La leggenda vuole che sussurrandole un desiderio all'orecchio si avveri entro un anno.",
-      "fotoEsclusivaUrl": "/foto/statua.jpg",
+      "fotoEsclusivaUrl": "/foto/statua-sussurrante.png",
       "qrToken": "TREK-QR-0002"
     }
   ],
@@ -26,6 +26,11 @@
       "utenteId": "b57563b6-526c-41a8-aac5-bc645ac6655e",
       "poiId": "poi-1",
       "scansionatoIl": "2026-07-15T11:12:20.790Z"
+    },
+    {
+      "utenteId": "b57563b6-526c-41a8-aac5-bc645ac6655e",
+      "poiId": "poi-2",
+      "scansionatoIl": "2026-07-17T20:29:41.707Z"
     }
   ]
 }

@@ -39,7 +39,7 @@ function datiIniziali(): DataShape {
         lat: 38.9989,
         lng: 16.5033,
         curiosita: "Costruito nell'età nuragica, veniva usato per riti legati al culto dell'acqua.",
-        fotoEsclusivaUrl: "/foto/pozzo-sacro.jpg",
+        fotoEsclusivaUrl: "/foto/pozzo-sacro.png",
         qrToken: "TREK-QR-0001"
       },
       {
@@ -49,7 +49,7 @@ function datiIniziali(): DataShape {
         lat: 38.9995,
         lng: 16.504,
         curiosita: "La leggenda vuole che sussurrandole un desiderio all'orecchio si avveri entro un anno.",
-        fotoEsclusivaUrl: "/foto/statua.jpg",
+        fotoEsclusivaUrl: "/foto/statua-sussurrante.png",
         qrToken: "TREK-QR-0002"
       }
     ],
@@ -82,11 +82,13 @@ export function getScansioniUtente(utenteId: string): ScanRecord[] {
   return leggi().scansioni.filter((s) => s.utenteId === utenteId);
 }
 
-export function registraScansione(utenteId: string, poiId: string): void {
+export function registraScansione(utenteId: string, poiId: string): boolean {
   const dati = leggi();
   const esiste = dati.scansioni.some((s) => s.utenteId === utenteId && s.poiId === poiId);
   if (!esiste) {
     dati.scansioni.push({ utenteId, poiId, scansionatoIl: new Date().toISOString() });
     scrivi(dati);
+    return true;
   }
+  return false;
 }
