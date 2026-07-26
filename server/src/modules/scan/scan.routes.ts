@@ -10,14 +10,18 @@ const RAGGIO_DEFAULT_METRI = 100;
 scanRouter.post("/", (req, res) => {
   const { qrToken, lat, lng } = req.body as { qrToken?: string; lat?: number; lng?: number };
 
-  if (!qrToken) {
-    return res.status(400).json({ errore: "qrToken mancante" });
+  if (typeof qrToken !== "string" || qrToken.trim().length === 0) {
+    return res.status(400).json({ errore: "qrToken mancante o non valido" });
   }
-  if (typeof lat !== "number" || typeof lng !== "number") {
-    return res.status(400).json({ errore: "Posizione mancante: lat/lng richiesti" });
+  if (
+    typeof lat !== "number" || typeof lng !== "number" ||
+    !Number.isFinite(lat) || !Number.isFinite(lng) ||
+    lat < -90 || lat > 90 || lng < -180 || lng > 180
+  ) {
+    return res.status(400).json({ errore: "Posizione non valida: lat/lng richiesti" });
   }
 
-  const poi = getPoiDaToken(qrToken);
+  const poi = getPoiDaToken(qrToken.trim());
   if (!poi) {
     return res.status(404).json({ errore: "Codice QR non riconosciuto" });
   }

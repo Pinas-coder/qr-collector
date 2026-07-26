@@ -14,6 +14,16 @@ export interface PuntoInteresse {
   raggioMetri?: number;
 }
 
+/** Dati minimi mostrabili sulla mappa prima dello sblocco. */
+export interface AnteprimaPuntoInteresse {
+  id: string;
+  nome: string;
+  categoria: CategoriaPOI;
+  lat: number;
+  lng: number;
+  raggioMetri?: number;
+}
+
 /** Rappresentazione interna al backend, usata solo per validare una scansione. */
 export interface PuntoInteresseConToken extends PuntoInteresse {
   qrToken: string;

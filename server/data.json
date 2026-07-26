@@ -2,33 +2,36 @@
   "puntiInteresse": [
     {
       "id": "poi-1",
-      "nome": "Il pozzo sacro",
+      "nome": "Pozzo sacro di Santa Cristina",
       "categoria": "Storia",
       "lat": 40.0613692,
       "lng": 8.7321004,
-      "curiosita": "Costruito nell'età nuragica, veniva usato per riti legati al culto dell'acqua.",
+      "curiosita": "Il pozzo sacro nuragico è celebre per la scala di venticinque gradini che conduce alla camera con acqua sorgiva.",
       "fotoEsclusivaUrl": "/foto/pozzo-sacro.png",
-      "qrToken": "TREK-QR-0001"
+      "qrToken": "TREK-QR-0001",
+      "raggioMetri": 100
     },
     {
       "id": "poi-2",
-      "nome": "Santuario Campestre di Santa Cristina",
+      "nome": "Santuario campestre di Santa Cristina",
       "categoria": "Cultura",
       "lat": 40.0609505,
       "lng": 8.7313519,
-      "curiosita": "La leggenda vuole che sussurrandole un desiderio all'orecchio si avveri entro un anno.",
-      "fotoEsclusivaUrl": "/foto/statua-sussurrante.png",
-      "qrToken": "TREK-QR-0002"
+      "curiosita": "La piccola chiesa campestre è il cuore delle celebrazioni tradizionali che animano il sito di Santa Cristina.",
+      "fotoEsclusivaUrl": "/foto/santa-cristina.png",
+      "qrToken": "TREK-QR-0002",
+      "raggioMetri": 100
     },
     {
       "id": "poi-3",
-      "nome": "Villaggio",
+      "nome": "Villaggio nuragico di Santa Cristina",
       "categoria": "Cultura",
       "lat": 40.060928,
       "lng": 8.7293256,
-      "curiosita": "La leggenda vuole che sussurrandole un desiderio all'orecchio si avveri entro un anno.",
-      "fotoEsclusivaUrl": "/foto/Screenshot 2026-07-26 122028.png",
-      "qrToken": "TREK-QR-0003"
+      "curiosita": "Tra capanne circolari e muri a secco si riconosce l'organizzazione quotidiana di un antico insediamento nuragico.",
+      "fotoEsclusivaUrl": "/foto/villaggio-nuragico.png",
+      "qrToken": "TREK-QR-0003",
+      "raggioMetri": 100
     }
   ],
   "scansioni": [

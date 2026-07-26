@@ -52,7 +52,7 @@ Tutti gli endpoint applicativi richiedono l'header `X-User-Id`, un UUID v4 gener
 | Metodo | Endpoint | Descrizione |
 | --- | --- | --- |
 | `GET` | `/api/health` | Controllo disponibilità server. |
-| `GET` | `/api/pois` | Elenco POI senza esporre il token QR. |
+| `GET` | `/api/pois` | Anteprime dei POI per la mappa: non espone token, curiosità o foto esclusive. |
 | `POST` | `/api/scan` | Registra una scansione valida. Body: `{ qrToken, lat, lng }`. |
 | `GET` | `/api/rewards/profilo` | Profilo e scansioni arricchite con i dati pubblici del POI sbloccato. |
 
@@ -64,6 +64,7 @@ I POI e le scansioni sono salvati in [server/data.json](server/data.json). I tok
 
 - `TREK-QR-0001`
 - `TREK-QR-0002`
+- `TREK-QR-0003`
 
 Per una prova completa, usa una posizione vicina alle coordinate del POI oppure modifica i dati demo in ambiente locale.
 
@@ -85,4 +86,4 @@ Il client genera la cartella `client/dist`. Il server genera il JavaScript compi
 - Coordinate e token QR possono essere falsificati da un client modificato: per premi reali servono QR firmati/monouso e controlli antifrode lato server.
 - Lo store JSON è adeguato a demo e piccoli test; per produzione è consigliato un database.
 - Il QR dello sconto nella pagina Premi è ancora un placeholder visivo.
-- `docker-compose.yml` è presente nel repository ma non è ancora configurato per l'architettura corrente basata su `data.json`.
+- Docker Compose è stato rimosso finché non sarà disponibile una configurazione coerente con lo store JSON.

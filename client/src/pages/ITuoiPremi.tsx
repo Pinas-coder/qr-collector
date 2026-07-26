@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { getProfilo, getPuntiInteresse } from "../lib/api";
-import type { ProfiloUtente, PuntoInteresse } from "../../../shared/types";
+import type { AnteprimaPuntoInteresse, ProfiloUtente } from "../../../shared/types";
 import AnimatedCard from "../components/AnimatedCard";
+import FotoPOI from "../components/FotoPOI";
 import PageTransition from "../components/PageTransition";
 
 function formattaData(data: string): string {
@@ -10,17 +11,9 @@ function formattaData(data: string): string {
   return Number.isNaN(valore.getTime()) ? "Data non disponibile" : valore.toLocaleDateString("it-IT", { day: "2-digit", month: "short", year: "numeric" });
 }
 
-function FotoPOI({ poi }: { poi: PuntoInteresse }) {
-  const [immagineNonDisponibile, setImmagineNonDisponibile] = useState(!poi.fotoEsclusivaUrl);
-  return <div className="relative h-full w-full bg-surface-container-highest">
-    <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 text-on-surface-variant"><span className="material-symbols-outlined text-3xl">image</span><span className="text-xs">Foto non disponibile</span></div>
-    {!immagineNonDisponibile && <img src={poi.fotoEsclusivaUrl} alt={poi.nome} className="relative h-full w-full object-cover" onError={() => setImmagineNonDisponibile(true)} />}
-  </div>;
-}
-
 export default function ITuoiPremi() {
   const [profilo, setProfilo] = useState<ProfiloUtente | null>(null);
-  const [poi, setPoi] = useState<PuntoInteresse[]>([]);
+  const [poi, setPoi] = useState<AnteprimaPuntoInteresse[]>([]);
   const [errore, setErrore] = useState<string | null>(null);
   const [caricamento, setCaricamento] = useState(true);
 
@@ -53,7 +46,7 @@ export default function ITuoiPremi() {
         <div className="mb-3 flex items-center justify-between"><h2 className="font-display font-semibold">Galleria sbloccata</h2><span className="rounded-full bg-primary-container/20 px-3 py-1 font-mono text-xs text-primary">{scansioniSbloccate.length} / {poi.length}</span></div>
         {scansioniSbloccate.length === 0 ? <p className="text-sm text-on-surface-variant">Nessuna foto sbloccata finora. Scansiona un QR per iniziare.</p> : <div className="grid grid-cols-2 gap-3">
           {scansioniSbloccate.map((scansione, indice) => <motion.article key={scansione.poiId} className={`relative overflow-hidden rounded-xl bg-surface-container-highest ${indice === 0 ? "col-span-2 aspect-[2/1]" : "aspect-square"}`} initial={{ opacity: 0, scale: .9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: .2 + indice * .1 }} whileHover={{ scale: 1.03 }}>
-            <FotoPOI poi={scansione.poi} />
+            <FotoPOI src={scansione.poi.fotoEsclusivaUrl} alt={scansione.poi.nome} className="h-full w-full object-cover" />
             <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-3"><span className="font-mono text-[10px] uppercase text-white/80">{scansione.poi.categoria}</span><span className="block font-display text-sm font-semibold text-white">{scansione.poi.nome}</span></div>
           </motion.article>)}
         </div>}
@@ -63,7 +56,7 @@ export default function ITuoiPremi() {
         {scansioniSbloccate.map((scansione, indice) => <motion.article key={scansione.poiId} className="flex items-start gap-3 rounded-xl bg-surface-card p-4 shadow-sm" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: .2 + indice * .1 }} whileHover={{ x: 4 }}>
           <span className="material-symbols-outlined shrink-0 text-primary">menu_book</span><div><h3 className="font-display text-sm font-semibold">{scansione.poi.nome}</h3><p className="mt-1 text-xs text-on-surface-variant">{scansione.poi.curiosita}</p><p className="mt-2 font-mono text-[10px] uppercase text-outline">Scoperto il {formattaData(scansione.scansionatoIl)}</p></div>
         </motion.article>)}
-        {poiBloccati.map((punto) => <div key={punto.id} className="flex items-start gap-3 rounded-xl bg-surface-container p-4 opacity-70"><span className="material-symbols-outlined shrink-0 text-outline">lock</span><div><h3 className="font-display text-sm font-semibold text-on-surface-variant">Curiosità sconosciuta</h3><p className="mt-1 text-xs text-outline">Continua a esplorare per sbloccarla.</p></div></div>)}
+        {poiBloccati.map((punto) => <div key={punto.id} className="flex items-start gap-3 rounded-xl bg-surface-container p-4 opacity-70"><span className="material-symbols-outlined shrink-0 text-outline">lock</span><div><p className="font-mono text-[10px] uppercase text-outline">{punto.categoria}</p><h3 className="font-display text-sm font-semibold text-on-surface-variant">{punto.nome}</h3><p className="mt-1 text-xs text-outline">Scansiona il QR sul posto per sbloccare la curiosità.</p></div></div>)}
       </section>
     </>}
   </div></PageTransition>;
