@@ -34,21 +34,5 @@
       "raggioMetri": 100
     }
   ],
-  "scansioni": [
-    {
-      "utenteId": "b57563b6-526c-41a8-aac5-bc645ac6655e",
-      "poiId": "poi-1",
-      "scansionatoIl": "2026-07-26T10:24:01.154Z"
-    },
-    {
-      "utenteId": "b57563b6-526c-41a8-aac5-bc645ac6655e",
-      "poiId": "poi-2",
-      "scansionatoIl": "2026-07-26T10:34:53.542Z"
-    },
-    {
-      "utenteId": "b57563b6-526c-41a8-aac5-bc645ac6655e",
-      "poiId": "poi-3",
-      "scansionatoIl": "2026-07-26T10:35:24.831Z"
-    }
-  ]
+  "scansioni": []
 }

@@ -29,7 +29,7 @@ export default function ITuoiPremi() {
   const poiBloccati = poi.filter((punto) => !idSbloccati.has(punto.id));
 
   return <PageTransition><div className="space-y-6 px-5 pb-6 pt-6">
-    <motion.h1 className="font-display text-lg font-bold" initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>Il tuo premio</motion.h1>
+    <motion.h1 className="font-display text-lg font-bold" initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>I tuoi premi</motion.h1>
 
     {caricamento && <div className="rounded-xl bg-surface-card p-6 text-center text-sm text-on-surface-variant">Caricamento premi...</div>}
     {errore && <div role="alert" className="rounded-xl border border-error/30 bg-error/10 p-4 text-sm text-error">{errore}</div>}
