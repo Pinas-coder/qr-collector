@@ -1,48 +1,88 @@
 # QR Collector
 
-Web app mobile-first per collezionare QR code fisici in punti di interesse, sbloccando curiosità, sconti cumulabili e foto esclusive.
+Web app mobile-first per scoprire punti di interesse tramite QR code fisici. Ogni scansione valida sblocca curiosità, foto esclusive e contribuisce a uno sconto cumulativo.
 
-## Struttura
+## Funzionalità
+
+- Mappa Leaflet con tile CartoDB, marker per categoria, legenda e stato dei POI sbloccati.
+- Scansione QR dalla fotocamera (`html5-qrcode`) e inserimento manuale del token.
+- Verifica della posizione al momento della scansione: il QR è valido solo entro il raggio del POI.
+- Profilo anonimo persistente nel browser tramite UUID in `localStorage`.
+- Dashboard, premi e galleria delle curiosità/foto sbloccate.
+- Animazioni e transizioni UI con Framer Motion, inclusa una sequenza celebrativa allo sblocco.
+- PWA con manifest e icona applicativa.
+- Persistenza leggera in `server/data.json`.
+
+## Architettura
 
 ```
-/client        React + Vite + TypeScript + Tailwind + Framer Motion + react-leaflet + PWA
-/server        Express + TypeScript + store JSON su file (nessuna dipendenza nativa), organizzato a moduli (pois, scan, rewards)
-/shared        Tipi TypeScript condivisi tra client e server
-docker-compose.yml
+client/   React + Vite + TypeScript + Tailwind + Framer Motion + React Leaflet + PWA
+server/   Express + TypeScript, moduli pois / scan / rewards, store JSON locale
+shared/   Tipi TypeScript condivisi
 ```
 
-## Avvio in locale
+## Avvio locale
 
-**Server** (porta 4000):
+Sono richiesti Node.js e npm.
+
+Avvia prima il backend:
+
 ```bash
 cd server
 npm install
 npm run dev
 ```
 
-**Client** (porta 5173, con proxy verso /api):
+In un secondo terminale avvia il frontend:
+
 ```bash
 cd client
 npm install
 npm run dev
 ```
 
-Apri `http://localhost:5173`.
+Apri [http://localhost:5173](http://localhost:5173). Vite inoltra le richieste `/api` al server sulla porta `4000`.
 
-## Stato attuale
+> La fotocamera e la geolocalizzazione richiedono un contesto sicuro: `localhost` è supportato durante lo sviluppo; in produzione usa HTTPS e consenti i relativi permessi nel browser.
 
-- 4 schermate collegate da router: Dashboard, Mappa scoperte, Scansiona QR, I tuoi premi
-- Stile Tailwind con i design token del mockup Stitch (`Discovery Quest`) già trasferiti in `tailwind.config.ts`
-- Backend minimo con 3 endpoint: `GET /api/pois`, `POST /api/scan`, `GET /api/rewards/profilo`
-- Un solo "utente anonimo" condiviso — nessun login ancora
-- Mappa con Leaflet + 2 punti di interesse di esempio, seedati automaticamente in `server/data.json` al primo avvio
-- Dati persistiti in un semplice file JSON (`server/data.json`), niente database vero e nessuna dipendenza nativa da compilare — comodo per iniziare, da sostituire con Postgres/SQLite quando il progetto cresce
+## API
 
-## Da fare
+Tutti gli endpoint applicativi richiedono l'header `X-User-Id`, un UUID v4 generato e salvato dal client.
 
-- [ ] Vero scanner QR via fotocamera (es. libreria `qr-scanner`), oggi c'è solo l'inserimento manuale del codice
-- [ ] Generazione reale del QR sconto in "I tuoi premi" (es. `qrcode.react`)
-- [ ] Autenticazione utente (anche solo un ID anonimo persistente in localStorage, per iniziare)
-- [ ] Verifica di geolocalizzazione alla scansione, per evitare scansioni da remoto
-- [ ] Animazioni Framer Motion su sblocco frammenti e progress bar
-- [ ] Icone PWA reali in `client/public` (192x192, 512x512)
+| Metodo | Endpoint | Descrizione |
+| --- | --- | --- |
+| `GET` | `/api/health` | Controllo disponibilità server. |
+| `GET` | `/api/pois` | Elenco POI senza esporre il token QR. |
+| `POST` | `/api/scan` | Registra una scansione valida. Body: `{ qrToken, lat, lng }`. |
+| `GET` | `/api/rewards/profilo` | Profilo e scansioni arricchite con i dati pubblici del POI sbloccato. |
+
+Una scansione duplicata restituisce `409`; una posizione fuori raggio restituisce `403`.
+
+## Dati di esempio
+
+I POI e le scansioni sono salvati in [server/data.json](server/data.json). I token demo sono:
+
+- `TREK-QR-0001`
+- `TREK-QR-0002`
+
+Per una prova completa, usa una posizione vicina alle coordinate del POI oppure modifica i dati demo in ambiente locale.
+
+## Build di produzione
+
+```bash
+cd server
+npm run build
+
+cd ../client
+npm run build
+```
+
+Il client genera la cartella `client/dist`. Il server genera il JavaScript compilato in `server/dist`.
+
+## Limiti e prossimi passi
+
+- L'UUID anonimo non sostituisce un'autenticazione reale.
+- Coordinate e token QR possono essere falsificati da un client modificato: per premi reali servono QR firmati/monouso e controlli antifrode lato server.
+- Lo store JSON è adeguato a demo e piccoli test; per produzione è consigliato un database.
+- Il QR dello sconto nella pagina Premi è ancora un placeholder visivo.
+- `docker-compose.yml` è presente nel repository ma non è ancora configurato per l'architettura corrente basata su `data.json`.

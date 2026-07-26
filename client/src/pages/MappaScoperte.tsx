@@ -1,11 +1,17 @@
 import { useEffect, useState } from "react";
 import { MapContainer, TileLayer, ZoomControl } from "react-leaflet";
+import type { LatLngBoundsExpression } from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { getProfilo, getPuntiInteresse } from "../lib/api";
 import type { ProfiloUtente, PuntoInteresse } from "../../../shared/types";
 import CustomMarker from "../components/CustomMarker";
 import MapLegend from "../components/MapLegend";
 import PageTransition from "../components/PageTransition";
+
+const SARDEGNA_BOUNDS: LatLngBoundsExpression = [
+  [38.75, 7.75],
+  [41.45, 10.15]
+];
 
 export default function MappaScoperte() {
   const [poi, setPoi] = useState<PuntoInteresse[]>([]);
@@ -14,11 +20,19 @@ export default function MappaScoperte() {
   useEffect(() => {
     Promise.all([getPuntiInteresse().then(setPoi), getProfilo().then(setProfilo)]).catch(() => {}).finally(() => setLoading(false));
   }, []);
-  const centro: [number, number] = poi.length ? [poi[0].lat, poi[0].lng] : [38.9989, 16.5033];
   const idSbloccati = new Set(profilo?.qrRaccolti.map((q) => q.poiId) ?? []);
 
-  return <PageTransition><div className="relative z-0 h-[calc(100vh-72px)] bg-surface">
-    <MapContainer center={centro} zoom={14} className="h-full w-full" zoomControl={false}>
+  return <PageTransition><div className="relative z-0 h-[calc(100dvh-72px)] bg-surface">
+    <MapContainer
+      bounds={SARDEGNA_BOUNDS}
+      boundsOptions={{ padding: [16, 16] }}
+      minZoom={7}
+      maxZoom={18}
+      maxBounds={SARDEGNA_BOUNDS}
+      maxBoundsViscosity={1}
+      className="h-full w-full"
+      zoomControl={false}
+    >
       <TileLayer attribution='&copy; OpenStreetMap contributors &copy; CARTO' url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png" maxZoom={19} />
       <ZoomControl position="topright" />
       {poi.map((p) => <CustomMarker key={p.id} poi={p} isUnlocked={idSbloccati.has(p.id)} />)}

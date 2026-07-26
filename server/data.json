@@ -4,33 +4,48 @@
       "id": "poi-1",
       "nome": "Il pozzo sacro",
       "categoria": "Storia",
-      "lat": 38.9989,
-      "lng": 16.5033,
+      "lat": 40.0613692,
+      "lng": 8.7321004,
       "curiosita": "Costruito nell'età nuragica, veniva usato per riti legati al culto dell'acqua.",
       "fotoEsclusivaUrl": "/foto/pozzo-sacro.png",
       "qrToken": "TREK-QR-0001"
     },
     {
       "id": "poi-2",
-      "nome": "La statua sussurrante",
+      "nome": "Santuario Campestre di Santa Cristina",
       "categoria": "Cultura",
-      "lat": 38.9995,
-      "lng": 16.504,
+      "lat": 40.0609505,
+      "lng": 8.7313519,
       "curiosita": "La leggenda vuole che sussurrandole un desiderio all'orecchio si avveri entro un anno.",
       "fotoEsclusivaUrl": "/foto/statua-sussurrante.png",
       "qrToken": "TREK-QR-0002"
+    },
+    {
+      "id": "poi-3",
+      "nome": "Villaggio",
+      "categoria": "Cultura",
+      "lat": 40.060928,
+      "lng": 8.7293256,
+      "curiosita": "La leggenda vuole che sussurrandole un desiderio all'orecchio si avveri entro un anno.",
+      "fotoEsclusivaUrl": "/foto/Screenshot 2026-07-26 122028.png",
+      "qrToken": "TREK-QR-0003"
     }
   ],
   "scansioni": [
     {
       "utenteId": "b57563b6-526c-41a8-aac5-bc645ac6655e",
       "poiId": "poi-1",
-      "scansionatoIl": "2026-07-15T11:12:20.790Z"
+      "scansionatoIl": "2026-07-26T10:24:01.154Z"
     },
     {
       "utenteId": "b57563b6-526c-41a8-aac5-bc645ac6655e",
       "poiId": "poi-2",
-      "scansionatoIl": "2026-07-17T20:29:41.707Z"
+      "scansionatoIl": "2026-07-26T10:34:53.542Z"
+    },
+    {
+      "utenteId": "b57563b6-526c-41a8-aac5-bc645ac6655e",
+      "poiId": "poi-3",
+      "scansionatoIl": "2026-07-26T10:35:24.831Z"
     }
   ]
 }

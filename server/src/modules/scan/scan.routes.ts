@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { getPoiDaToken, getScansioniUtente, registraScansione } from "../../db/store.js";
 import { distanzaMetri } from "../../utils/geo.js";
+import { calcolaSconto } from "../../../../shared/types.js";
 
 export const scanRouter = Router();
 
@@ -41,16 +42,3 @@ scanRouter.post("/", (req, res) => {
   const { qrToken: _omesso, ...poiSenzaToken } = poi;
   res.json({ poi: poiSenzaToken, nuovoSconto: calcolaSconto(totale) });
 });
-
-function calcolaSconto(numeroQrRaccolti: number): number {
-  const soglie = [
-    { qrMinimi: 0, percentuale: 0 },
-    { qrMinimi: 4, percentuale: 5 },
-    { qrMinimi: 7, percentuale: 10 },
-    { qrMinimi: 10, percentuale: 15 },
-    { qrMinimi: 13, percentuale: 20 }
-  ];
-  let sconto = 0;
-  for (const s of soglie) if (numeroQrRaccolti >= s.qrMinimi) sconto = s.percentuale;
-  return sconto;
-}

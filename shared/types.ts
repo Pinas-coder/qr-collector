@@ -2,6 +2,7 @@
 
 export type CategoriaPOI = "Storia" | "Natura" | "Cultura" | "Bonus";
 
+/** Rappresentazione pubblica di un punto di interesse: non contiene il token QR. */
 export interface PuntoInteresse {
   id: string;
   nome: string;
@@ -10,6 +11,11 @@ export interface PuntoInteresse {
   lng: number;
   curiosita: string;
   fotoEsclusivaUrl: string;
+  raggioMetri?: number;
+}
+
+/** Rappresentazione interna al backend, usata solo per validare una scansione. */
+export interface PuntoInteresseConToken extends PuntoInteresse {
   qrToken: string;
 }
 
@@ -18,11 +24,16 @@ export interface QRScansionato {
   scansionatoIl: string; // ISO date
 }
 
+export interface QRScansionatoDettagliato extends QRScansionato {
+  poi: PuntoInteresse;
+}
+
 export interface ProfiloUtente {
   id: string;
   livelloEsploratore: number;
-  qrRaccolti: QRScansionato[];
+  qrRaccolti: QRScansionatoDettagliato[];
   streakGiorni: number;
+  scontoAttivo: number;
 }
 
 export interface SogliaSconto {
@@ -35,26 +46,13 @@ export const SOGLIE_SCONTO: SogliaSconto[] = [
   { qrMinimi: 4, percentuale: 5 },
   { qrMinimi: 7, percentuale: 10 },
   { qrMinimi: 10, percentuale: 15 },
-  { qrMinimi: 13, percentuale: 20 },
+  { qrMinimi: 13, percentuale: 20 }
 ];
 
 export function calcolaSconto(numeroQrRaccolti: number): number {
   let sconto = 0;
   for (const soglia of SOGLIE_SCONTO) {
-    if (numeroQrRaccolti >= soglia.qrMinimi) {
-      sconto = soglia.percentuale;
-    }
+    if (numeroQrRaccolti >= soglia.qrMinimi) sconto = soglia.percentuale;
   }
   return sconto;
-}
-export interface PuntoInteresse {
-  id: string;
-  nome: string;
-  categoria: CategoriaPOI;
-  lat: number;
-  lng: number;
-  curiosita: string;
-  fotoEsclusivaUrl: string;
-  qrToken: string;
-  raggioMetri?: number; // default 100 se assente
 }
