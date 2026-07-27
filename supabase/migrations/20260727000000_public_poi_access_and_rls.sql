@@ -25,10 +25,9 @@ revoke all on table public.points_of_interest from anon, authenticated;
 revoke all on table public.scans from anon, authenticated;
 revoke all on table public.public_points_of_interest from anon, authenticated;
 
--- La view resta disponibile al ruolo autenticato, ma non viene usata dal
--- client: senza privilegi sulla tabella sottostante security_invoker la rende
--- correttamente non consultabile. L'accesso pubblico avviene tramite RPC.
-grant select on public.public_points_of_interest to authenticated;
+-- Non viene concesso SELECT sulla view: con security_invoker richiederebbe
+-- privilegi sulla tabella sottostante, che contiene colonne sensibili.
+-- L'interfaccia pubblica principale è la RPC limitata qui sotto.
 
 -- La funzione esegue una query a colonne esplicitamente consentite. Il tipo di
 -- ritorno della view evita di duplicare i tipi SQL delle colonne.

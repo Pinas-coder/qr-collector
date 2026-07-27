@@ -16,6 +16,26 @@ Web app mobile-first per scoprire punti di interesse tramite QR code fisici. Ogn
 ## Architettura
 
 ```
+
+## Architettura target V5
+
+- Netlify: frontend React/Vite PWA.
+- Supabase Auth: sessione anonima e futura conversione account.
+- Supabase PostgreSQL: profili, POI e scansioni.
+- Supabase Storage: preview pubbliche e immagini premio private.
+- Supabase Edge Functions: scansione QR e profilo premi.
+
+## Stato della migrazione
+
+La Supabase Foundation è presente nel repository. Express e lo store JSON rimangono temporaneamente attivi; il frontend non è ancora collegato a Supabase e le Edge Functions sono solo skeleton che rispondono `501`.
+
+Per la foundation locale, dopo aver installato Supabase CLI e Docker, usa:
+
+```bash
+supabase start
+supabase db reset
+supabase db lint
+```
 client/   React + Vite + TypeScript + Tailwind + Framer Motion + React Leaflet + PWA
 server/   Express + TypeScript, moduli pois / scan / rewards, store JSON locale
 shared/   Tipi TypeScript condivisi
