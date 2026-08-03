@@ -55,5 +55,73 @@ export async function getPuntiInteresse(): Promise<AnteprimaPuntoInteresse[]> {
 
   return rows.map((row: unknown) => mappaPoiPubblico(row));
 }
+
+export interface ScanPoiSuccessResponse {
+  message: string;
+  scan: {
+    poiId: string;
+    scannedAt: string;
+    distanceMeters: number;
+  };
+  poi: PuntoInteresse;
+  totalScans: number;
+  activeDiscount: number;
+}
+
+export class ScanPoiError extends Error {
+  constructor(message: string, public readonly status: number, public readonly code?: string) {
+    super(message);
+    this.name = "ScanPoiError";
+  }
+}
+
+function isPuntoInteresse(value: unknown): value is PuntoInteresse {
+  return isRecord(value) &&
+    typeof value.id === "string" &&
+    typeof value.nome === "string" &&
+    isCategoriaPOI(value.categoria) &&
+    typeof value.lat === "number" && Number.isFinite(value.lat) &&
+    typeof value.lng === "number" && Number.isFinite(value.lng) &&
+    typeof value.curiosita === "string" &&
+    (typeof value.fotoEsclusivaUrl === "string" || value.fotoEsclusivaUrl === null) &&
+    (value.raggioMetri === undefined || (typeof value.raggioMetri === "number" && Number.isFinite(value.raggioMetri)));
+}
+
+function isScanPoiSuccessResponse(value: unknown): value is ScanPoiSuccessResponse {
+  if (!isRecord(value) || typeof value.message !== "string" || !isRecord(value.scan)) return false;
+
+  return typeof value.scan.poiId === "string" &&
+    typeof value.scan.scannedAt === "string" &&
+    typeof value.scan.distanceMeters === "number" && Number.isFinite(value.scan.distanceMeters) &&
+    isPuntoInteresse(value.poi) &&
+    typeof value.totalScans === "number" && Number.isInteger(value.totalScans) && value.totalScans >= 0 &&
+    typeof value.activeDiscount === "number" && Number.isFinite(value.activeDiscount);
+}
+
+async function scanPoiErrorFrom(error: unknown): Promise<ScanPoiError> {
+  if (isRecord(error) && error.context instanceof Response) {
+    const response = error.context;
+    const payload: unknown = await response.clone().json().catch(() => null);
+    if (isRecord(payload) && typeof payload.error === "string") {
+      return new ScanPoiError(payload.error, response.status, typeof payload.code === "string" ? payload.code : undefined);
+    }
+    return new ScanPoiError("Errore durante la scansione", response.status);
+  }
+
+  return new ScanPoiError("Servizio di scansione temporaneamente non disponibile", 0);
+}
+
+export async function scansionaQR(qrToken: string, lat: number, lng: number): Promise<ScanPoiSuccessResponse> {
+  const supabase = getSupabaseClient();
+  const { data, error } = await supabase.functions.invoke<unknown>("scan-poi", {
+    body: { qrToken, lat, lng }
+  });
+
+  if (error) throw await scanPoiErrorFrom(error);
+  if (!isScanPoiSuccessResponse(data)) {
+    throw new ScanPoiError("Risposta non valida dal servizio di scansione", 0, "invalid_response");
+  }
+
+  return data;
+}
 export async function getProfilo(): Promise<ProfiloUtente> { const res = await fetch(`${BASE}/rewards/profilo`, { headers: headers() }); if (!res.ok) throw await errorFrom(res, "Impossibile caricare il profilo"); return res.json(); }
-export async function scansionaQR(qrToken: string, lat: number, lng: number): Promise<{ poi: PuntoInteresse; nuovoSconto: number }> { const res = await fetch(`${BASE}/scan`, { method: "POST", headers: headers({ "Content-Type": "application/json" }), body: JSON.stringify({ qrToken, lat, lng }) }); if (!res.ok) throw await errorFrom(res, "Impossibile elaborare il QR"); return res.json(); }

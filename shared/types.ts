@@ -10,7 +10,8 @@ export interface PuntoInteresse {
   lat: number;
   lng: number;
   curiosita: string;
-  fotoEsclusivaUrl: string;
+  /** URL disponibile dopo lo sblocco; null finché lo Storage privato non è configurato. */
+  fotoEsclusivaUrl: string | null;
   raggioMetri?: number;
 }
 

@@ -1,51 +1,29 @@
 # QR Collector
 
-Web app mobile-first per scoprire punti di interesse tramite QR code fisici. Ogni scansione valida sblocca curiosità, foto esclusive e contribuisce a uno sconto cumulativo.
+Web app mobile-first per scoprire punti di interesse tramite QR code fisici. Ogni scansione valida sblocca curiosità e contribuisce a uno sconto cumulativo.
 
 ## Funzionalità
 
-- Mappa Leaflet con tile CartoDB, marker per categoria, legenda e stato dei POI sbloccati.
+- Mappa Leaflet con marker per categoria, legenda e stato dei POI sbloccati.
 - Scansione QR dalla fotocamera (`html5-qrcode`) e inserimento manuale del token.
-- Verifica della posizione al momento della scansione: il QR è valido solo entro il raggio del POI.
-- Profilo anonimo persistente nel browser tramite UUID in `localStorage`.
+- Verifica della posizione al momento della scansione tramite formula di Haversine.
+- Sessione Supabase anonima persistente nel browser.
 - Dashboard, premi e galleria delle curiosità/foto sbloccate.
-- Animazioni e transizioni UI con Framer Motion, inclusa una sequenza celebrativa allo sblocco.
-- PWA con manifest e icona applicativa.
-- Persistenza leggera in `server/data.json`.
+- Animazioni e transizioni UI con Framer Motion e PWA Vite.
 
-## Architettura
+## Architettura e stato della migrazione
 
-```
+- **Frontend React/Vite PWA**: Supabase Auth con sessione anonima; POI pubblici tramite RPC `get_public_points_of_interest`.
+- **Scansione QR**: Supabase Edge Function `scan-poi`, invocata dal client con il JWT della sessione anonima.
+- **Database Supabase**: PostgreSQL conserva profili, POI e le nuove scansioni; il vincolo `(user_id, poi_id)` impedisce duplicati.
+- **Premi e dashboard**: continuano temporaneamente a usare Express e `server/data.json` con l'UUID legacy in `X-User-Id`.
+- **Storage**: non è ancora configurato per le foto premio; la risposta della scansione espone quindi `fotoEsclusivaUrl: null` e mai il percorso privato.
 
-## Architettura target V5
-
-- Netlify: frontend React/Vite PWA.
-- Supabase Auth: sessione anonima e futura conversione account.
-- Supabase PostgreSQL: profili, POI e scansioni.
-- Supabase Storage: preview pubbliche e immagini premio private.
-- Supabase Edge Functions: scansione QR e profilo premi.
-
-## Stato della migrazione
-
-La Supabase Foundation è presente nel repository. Express e lo store JSON rimangono temporaneamente attivi; il frontend non è ancora collegato a Supabase e le Edge Functions sono solo skeleton che rispondono `501`.
-
-Per la foundation locale, dopo aver installato Supabase CLI e Docker, usa:
-
-```bash
-supabase start
-supabase db reset
-supabase db lint
-```
-client/   React + Vite + TypeScript + Tailwind + Framer Motion + React Leaflet + PWA
-server/   Express + TypeScript, moduli pois / scan / rewards, store JSON locale
-shared/   Tipi TypeScript condivisi
-```
+La doppia identità è intenzionale e limitata alla migrazione dei premi: lo scanner usa l'utente Supabase ricavato dal JWT, mentre il profilo premi legacy resta su Express. Non eliminare ancora `getUserId()`, `X-User-Id` o il server JSON.
 
 ## Avvio locale
 
-Sono richiesti Node.js e npm.
-
-Avvia prima il backend:
+Sono richiesti Node.js e npm. Per il backend legacy:
 
 ```bash
 cd server
@@ -61,49 +39,79 @@ npm install
 npm run dev
 ```
 
-Apri [http://localhost:5173](http://localhost:5173). Vite inoltra le richieste `/api` al server sulla porta `4000`.
+Apri [http://localhost:5173](http://localhost:5173). Vite inoltra le richieste `/api` al server sulla porta `4000` per profilo e premi legacy.
 
-> La fotocamera e la geolocalizzazione richiedono un contesto sicuro: `localhost` è supportato durante lo sviluppo; in produzione usa HTTPS e consenti i relativi permessi nel browser.
+> Fotocamera e geolocalizzazione richiedono un contesto sicuro: `localhost` è supportato durante lo sviluppo; in produzione usa HTTPS e consenti i relativi permessi nel browser.
 
-## API
+## Configurazione Supabase
 
-Tutti gli endpoint applicativi richiedono l'header `X-User-Id`, un UUID v4 generato e salvato dal client.
+Nel client crea `client/.env` a partire da `client/.env.example` e imposta:
+
+```dotenv
+VITE_SUPABASE_URL=
+VITE_SUPABASE_PUBLISHABLE_KEY=
+```
+
+Abilita **Anonymous Sign-Ins** nel progetto Supabase. L'utente anonimo viene creato o recuperato all'avvio dell'app; il trigger database crea il profilo con lo stesso UUID.
+
+Per la Edge Function configura in Supabase i secret indicati in `supabase/.env.example`:
+
+- `SUPABASE_URL`;
+- una chiave pubblica: `SUPABASE_PUBLISHABLE_KEY` oppure il legacy `SUPABASE_ANON_KEY`;
+- una chiave privilegiata solo server-side: `SUPABASE_SECRET_KEY` oppure `SUPABASE_SERVICE_ROLE_KEY`;
+- `ALLOWED_ORIGINS`, includendo `http://localhost:5173` e il dominio Netlify in produzione.
+
+Non inserire mai chiavi secret o service-role nel client.
+
+## Deploy e prova di `scan-poi`
+
+Dalla Dashboard Supabase: **Edge Functions → scan-poi → Deploy**. Con CLI remota, se disponibile:
+
+```bash
+supabase functions deploy scan-poi
+```
+
+Per una prova manuale usa `TREK-QR-0001`, `TREK-QR-0002` o `TREK-QR-0003` e coordinate vicine al rispettivo POI. La funzione richiede la sessione anonima del browser, registra la scansione in Supabase e non restituisce `qr_token` né un percorso di Storage privato.
+
+## API legacy temporanee
+
+Gli endpoint Express seguenti restano attivi solo per compatibilità con premi e dashboard:
 
 | Metodo | Endpoint | Descrizione |
 | --- | --- | --- |
 | `GET` | `/api/health` | Controllo disponibilità server. |
-| `GET` | `/api/pois` | Anteprime dei POI per la mappa: non espone token, curiosità o foto esclusive. |
-| `POST` | `/api/scan` | Registra una scansione valida. Body: `{ qrToken, lat, lng }`. |
-| `GET` | `/api/rewards/profilo` | Profilo e scansioni arricchite con i dati pubblici del POI sbloccato. |
+| `GET` | `/api/pois` | Vecchie anteprime POI; la mappa usa ora la RPC Supabase. |
+| `POST` | `/api/scan` | Vecchio flusso JSON, mantenuto per confronto e rollback. |
+| `GET` | `/api/rewards/profilo` | Profilo e premi legacy. |
 
-Una scansione duplicata restituisce `409`; una posizione fuori raggio restituisce `403`.
+La pagina scanner usa invece `supabase.functions.invoke("scan-poi")` e non invia `X-User-Id` alla funzione.
 
 ## Dati di esempio
 
-I POI e le scansioni sono salvati in [server/data.json](server/data.json). I token demo sono:
+I token demo sono:
 
 - `TREK-QR-0001`
 - `TREK-QR-0002`
 - `TREK-QR-0003`
 
-Per una prova completa, usa una posizione vicina alle coordinate del POI oppure modifica i dati demo in ambiente locale.
+I POI Supabase sono definiti in `supabase/seed.sql`; i dati legacy restano in `server/data.json`.
 
-## Build di produzione
+## Build
 
 ```bash
-cd server
+cd client
+npm ci
 npm run build
 
-cd ../client
+cd ../server
+npm ci
 npm run build
 ```
 
-Il client genera la cartella `client/dist`. Il server genera il JavaScript compilato in `server/dist`.
+Per la foundation locale Supabase, dopo aver installato Supabase CLI e Docker:
 
-## Limiti e prossimi passi
-
-- L'UUID anonimo non sostituisce un'autenticazione reale.
-- Coordinate e token QR possono essere falsificati da un client modificato: per premi reali servono QR firmati/monouso e controlli antifrode lato server.
-- Lo store JSON è adeguato a demo e piccoli test; per produzione è consigliato un database.
-- Il QR dello sconto nella pagina Premi è ancora un placeholder visivo.
-- Docker Compose è stato rimosso finché non sarà disponibile una configurazione coerente con lo store JSON.
+```bash
+supabase start
+supabase db reset
+supabase db lint
+```

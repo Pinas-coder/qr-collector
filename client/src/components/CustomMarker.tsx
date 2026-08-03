@@ -18,7 +18,7 @@ interface CustomMarkerProps { poi: AnteprimaPuntoInteresse; poiSbloccato?: Punto
 export default function CustomMarker({ poi, poiSbloccato }: CustomMarkerProps) {
   const sbloccato = Boolean(poiSbloccato);
   return <Marker position={[poi.lat, poi.lng]} icon={createIcon(poi.categoria, sbloccato)}><Popup><div className="w-48">
-    <div className="mb-2 h-32 overflow-hidden rounded-lg">{sbloccato ? <FotoPOI src={poiSbloccato?.fotoEsclusivaUrl} alt={poi.nome} className="h-full w-full object-cover" /> : <div className="flex h-full items-center justify-center bg-surface-container-highest"><span className="material-symbols-outlined text-2xl">lock</span></div>}</div>
+    <div className="mb-2 h-32 overflow-hidden rounded-lg">{sbloccato ? <FotoPOI src={poiSbloccato?.fotoEsclusivaUrl ?? undefined} alt={poi.nome} className="h-full w-full object-cover" /> : <div className="flex h-full items-center justify-center bg-surface-container-highest"><span className="material-symbols-outlined text-2xl">lock</span></div>}</div>
     <p className="font-mono text-[10px] uppercase tracking-wide text-on-surface-variant">{poi.categoria}</p>
     <h3 className="font-display text-sm font-semibold text-on-surface">{poi.nome}</h3>
     <p className="mt-2 text-xs text-on-surface-variant">{sbloccato ? poiSbloccato?.curiosita : "Scansiona il QR per sbloccare questa curiosità."}</p>
