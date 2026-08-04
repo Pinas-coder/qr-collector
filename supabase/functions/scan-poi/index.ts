@@ -1,4 +1,5 @@
 import { withSupabase } from "npm:@supabase/server@^1";
+import { calcolaSconto } from "../_shared/rewards.ts";
 
 type CategoriaPOI = "Storia" | "Natura" | "Cultura" | "Bonus";
 
@@ -27,13 +28,6 @@ interface ScanRecord {
 
 const EARTH_RADIUS_METERS = 6_371_000;
 const CATEGORIE_POI: readonly CategoriaPOI[] = ["Storia", "Natura", "Cultura", "Bonus"];
-const SOGLIE_SCONTO = [
-  { qrMinimi: 0, percentuale: 0 },
-  { qrMinimi: 4, percentuale: 5 },
-  { qrMinimi: 7, percentuale: 10 },
-  { qrMinimi: 10, percentuale: 15 },
-  { qrMinimi: 13, percentuale: 20 }
-] as const;
 
 function jsonResponse(body: Record<string, unknown>, status: number, extraHeaders: HeadersInit = {}): Response {
   return Response.json(body, { status, headers: extraHeaders });
@@ -71,14 +65,6 @@ function distanzaMetri(lat1: number, lng1: number, lat2: number, lng2: number): 
     Math.cos(rad(lat1)) * Math.cos(rad(lat2)) * Math.sin(deltaLng / 2) ** 2;
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return EARTH_RADIUS_METERS * c;
-}
-
-function calcolaSconto(numeroScansioni: number): number {
-  let sconto = 0;
-  for (const soglia of SOGLIE_SCONTO) {
-    if (numeroScansioni >= soglia.qrMinimi) sconto = soglia.percentuale;
-  }
-  return sconto;
 }
 
 function isPoiRecord(value: unknown): value is PoiRecord {

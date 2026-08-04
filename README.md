@@ -16,10 +16,10 @@ Web app mobile-first per scoprire punti di interesse tramite QR code fisici. Ogn
 - **Frontend React/Vite PWA**: Supabase Auth con sessione anonima; POI pubblici tramite RPC `get_public_points_of_interest`.
 - **Scansione QR**: Supabase Edge Function `scan-poi`, invocata dal client con il JWT della sessione anonima.
 - **Database Supabase**: PostgreSQL conserva profili, POI e le nuove scansioni; il vincolo `(user_id, poi_id)` impedisce duplicati.
-- **Premi e dashboard**: continuano temporaneamente a usare Express e `server/data.json` con l'UUID legacy in `X-User-Id`.
+- **Profilo, premi e dashboard**: Supabase Edge Function `get-rewards-profile`, con scansioni e POI sbloccati dell'utente autenticato.
 - **Storage**: non è ancora configurato per le foto premio; la risposta della scansione espone quindi `fotoEsclusivaUrl: null` e mai il percorso privato.
 
-La doppia identità è intenzionale e limitata alla migrazione dei premi: lo scanner usa l'utente Supabase ricavato dal JWT, mentre il profilo premi legacy resta su Express. Non eliminare ancora `getUserId()`, `X-User-Id` o il server JSON.
+Scanner, profilo, mappa e premi usano l'utente Supabase ricavato dal JWT. Express, `getUserId()` e `X-User-Id` restano nel repository esclusivamente per rollback e per le route legacy non ancora rimosse; non sono più usati dal frontend per premi o profilo.
 
 ## Avvio locale
 
@@ -39,7 +39,7 @@ npm install
 npm run dev
 ```
 
-Apri [http://localhost:5173](http://localhost:5173). Vite inoltra le richieste `/api` al server sulla porta `4000` per profilo e premi legacy.
+Apri [http://localhost:5173](http://localhost:5173). Vite inoltra le eventuali richieste legacy `/api` al server sulla porta `4000`.
 
 > Fotocamera e geolocalizzazione richiedono un contesto sicuro: `localhost` è supportato durante lo sviluppo; in produzione usa HTTPS e consenti i relativi permessi nel browser.
 
@@ -54,37 +54,31 @@ VITE_SUPABASE_PUBLISHABLE_KEY=
 
 Abilita **Anonymous Sign-Ins** nel progetto Supabase. L'utente anonimo viene creato o recuperato all'avvio dell'app; il trigger database crea il profilo con lo stesso UUID.
 
-Per la Edge Function configura in Supabase i secret indicati in `supabase/.env.example`:
+Le Edge Functions usano `@supabase/server`: nel runtime gestito dal Dashboard i client autenticato e amministrativo vengono predisposti dal contesto `withSupabase`, senza leggere o dichiarare chiavi nel codice. Non inserire mai chiavi secret o service-role nel client.
 
-- `SUPABASE_URL`;
-- una chiave pubblica: `SUPABASE_PUBLISHABLE_KEY` oppure il legacy `SUPABASE_ANON_KEY`;
-- una chiave privilegiata solo server-side: `SUPABASE_SECRET_KEY` oppure `SUPABASE_SERVICE_ROLE_KEY`;
-- `ALLOWED_ORIGINS`, includendo `http://localhost:5173` e il dominio Netlify in produzione.
+## Deploy e prova delle Edge Functions
 
-Non inserire mai chiavi secret o service-role nel client.
-
-## Deploy e prova di `scan-poi`
-
-Dalla Dashboard Supabase: **Edge Functions → scan-poi → Deploy**. Con CLI remota, se disponibile:
+Dalla Dashboard Supabase distribuisci **scan-poi** e **get-rewards-profile**. Con CLI remota, se disponibile:
 
 ```bash
 supabase functions deploy scan-poi
+supabase functions deploy get-rewards-profile
 ```
 
-Per una prova manuale usa `TREK-QR-0001`, `TREK-QR-0002` o `TREK-QR-0003` e coordinate vicine al rispettivo POI. La funzione richiede la sessione anonima del browser, registra la scansione in Supabase e non restituisce `qr_token` né un percorso di Storage privato.
+Per una prova manuale usa `TREK-QR-0001`, `TREK-QR-0002` o `TREK-QR-0003` e coordinate vicine al rispettivo POI. `scan-poi` registra la scansione in Supabase; `get-rewards-profile` restituisce poi solo le scansioni dell'utente JWT, i POI sbloccati e lo sconto. Nessuna delle due function restituisce `qr_token` né un percorso di Storage privato.
 
 ## API legacy temporanee
 
-Gli endpoint Express seguenti restano attivi solo per compatibilità con premi e dashboard:
+Gli endpoint Express seguenti restano nel repository esclusivamente per rollback e confronto:
 
 | Metodo | Endpoint | Descrizione |
 | --- | --- | --- |
 | `GET` | `/api/health` | Controllo disponibilità server. |
 | `GET` | `/api/pois` | Vecchie anteprime POI; la mappa usa ora la RPC Supabase. |
 | `POST` | `/api/scan` | Vecchio flusso JSON, mantenuto per confronto e rollback. |
-| `GET` | `/api/rewards/profilo` | Profilo e premi legacy. |
+| `GET` | `/api/rewards/profilo` | Profilo legacy: non usato dal frontend. |
 
-La pagina scanner usa invece `supabase.functions.invoke("scan-poi")` e non invia `X-User-Id` alla funzione.
+Il frontend usa `supabase.functions.invoke("scan-poi")` per la scansione e `supabase.functions.invoke("get-rewards-profile")` per profilo e premi, senza inviare `X-User-Id` alle Edge Functions.
 
 ## Dati di esempio
 

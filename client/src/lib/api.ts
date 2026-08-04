@@ -1,11 +1,6 @@
 import type { AnteprimaPuntoInteresse, CategoriaPOI, PuntoInteresse, ProfiloUtente } from "../../../shared/types";
+import { FunctionsFetchError, FunctionsHttpError, FunctionsRelayError } from "@supabase/supabase-js";
 import { getSupabaseClient } from "./supabase";
-import { getUserId } from "./userId";
-
-const BASE = "/api";
-export class ApiError extends Error { constructor(message: string, public readonly status: number) { super(message); this.name = "ApiError"; } }
-function headers(extra?: Record<string, string>): HeadersInit { return { "X-User-Id": getUserId(), ...extra }; }
-async function errorFrom(res: Response, fallback: string) { const body = await res.json().catch(() => null) as { errore?: string } | null; return new ApiError(body?.errore ?? fallback, res.status); }
 
 const CATEGORIE_POI: readonly CategoriaPOI[] = ["Storia", "Natura", "Cultura", "Bonus"];
 
@@ -14,7 +9,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 function isCategoriaPOI(value: unknown): value is CategoriaPOI {
-  return typeof value === "string" && CATEGORIE_POI.includes(value as CategoriaPOI);
+  return typeof value === "string" && CATEGORIE_POI.some((categoria) => categoria === value);
 }
 
 function mappaPoiPubblico(value: unknown): AnteprimaPuntoInteresse {
@@ -124,4 +119,69 @@ export async function scansionaQR(qrToken: string, lat: number, lng: number): Pr
 
   return data;
 }
-export async function getProfilo(): Promise<ProfiloUtente> { const res = await fetch(`${BASE}/rewards/profilo`, { headers: headers() }); if (!res.ok) throw await errorFrom(res, "Impossibile caricare il profilo"); return res.json(); }
+
+export class ProfiloError extends Error {
+  constructor(message: string, public readonly status: number, public readonly code?: string) {
+    super(message);
+    this.name = "ProfiloError";
+  }
+}
+
+function isQRScansionatoDettagliato(value: unknown): boolean {
+  return isRecord(value) &&
+    typeof value.poiId === "string" &&
+    typeof value.scansionatoIl === "string" &&
+    isPuntoInteresse(value.poi);
+}
+
+function isProfiloUtente(value: unknown): value is ProfiloUtente {
+  return isRecord(value) &&
+    typeof value.id === "string" &&
+    typeof value.livelloEsploratore === "number" && Number.isFinite(value.livelloEsploratore) &&
+    Array.isArray(value.qrRaccolti) && value.qrRaccolti.every(isQRScansionatoDettagliato) &&
+    typeof value.streakGiorni === "number" && Number.isFinite(value.streakGiorni) &&
+    typeof value.scontoAttivo === "number" && Number.isFinite(value.scontoAttivo) &&
+    typeof value.totaleScansioni === "number" && Number.isInteger(value.totaleScansioni) && value.totaleScansioni >= 0;
+}
+
+async function profiloErrorFrom(error: unknown): Promise<ProfiloError> {
+  if (error instanceof FunctionsHttpError) {
+    const payload: unknown = await error.context.clone().json().catch(() => null);
+    if (isRecord(payload) && typeof payload.error === "string") {
+      return new ProfiloError(payload.error, error.context.status, typeof payload.code === "string" ? payload.code : undefined);
+    }
+    return new ProfiloError("Impossibile caricare il profilo", error.context.status);
+  }
+
+  if (error instanceof FunctionsRelayError) {
+    return new ProfiloError("Il servizio profilo non è disponibile. Riprova tra poco.", 0, "relay_error");
+  }
+
+  if (error instanceof FunctionsFetchError) {
+    return new ProfiloError("Connessione al servizio profilo non disponibile. Riprova tra poco.", 0, "fetch_error");
+  }
+
+  return new ProfiloError("Impossibile caricare il profilo. Riprova tra poco.", 0);
+}
+
+export async function getProfilo(): Promise<ProfiloUtente> {
+  const supabase = getSupabaseClient();
+  const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+  const accessToken = sessionData.session?.access_token;
+
+  if (sessionError || !accessToken) {
+    throw new ProfiloError("La sessione è scaduta. Ricarica la pagina e riprova.", 401, "unauthorized");
+  }
+
+  const { data, error } = await supabase.functions.invoke<unknown>("get-rewards-profile", {
+    body: {},
+    headers: { Authorization: `Bearer ${accessToken}` }
+  });
+
+  if (error) throw await profiloErrorFrom(error);
+  if (!isProfiloUtente(data)) {
+    throw new ProfiloError("Il servizio profilo ha restituito dati non validi.", 0, "invalid_response");
+  }
+
+  return data;
+}

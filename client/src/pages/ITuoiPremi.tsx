@@ -25,6 +25,7 @@ export default function ITuoiPremi() {
   }, []);
 
   const scansioniSbloccate = profilo?.qrRaccolti ?? [];
+  const totaleScansioni = profilo?.totaleScansioni ?? 0;
   const idSbloccati = new Set(scansioniSbloccate.map((scansione) => scansione.poiId));
   const poiBloccati = poi.filter((punto) => !idSbloccati.has(punto.id));
 
@@ -43,7 +44,7 @@ export default function ITuoiPremi() {
       </AnimatedCard>
 
       <section>
-        <div className="mb-3 flex items-center justify-between"><h2 className="font-display font-semibold">Galleria sbloccata</h2><span className="rounded-full bg-primary-container/20 px-3 py-1 font-mono text-xs text-primary">{scansioniSbloccate.length} / {poi.length}</span></div>
+        <div className="mb-3 flex items-center justify-between"><h2 className="font-display font-semibold">Galleria sbloccata</h2><span className="rounded-full bg-primary-container/20 px-3 py-1 font-mono text-xs text-primary">{totaleScansioni} / {poi.length}</span></div>
         {scansioniSbloccate.length === 0 ? <p className="text-sm text-on-surface-variant">Nessuna foto sbloccata finora. Scansiona un QR per iniziare.</p> : <div className="grid grid-cols-2 gap-3">
           {scansioniSbloccate.map((scansione, indice) => <motion.article key={scansione.poiId} className={`relative overflow-hidden rounded-xl bg-surface-container-highest ${indice === 0 ? "col-span-2 aspect-[2/1]" : "aspect-square"}`} initial={{ opacity: 0, scale: .9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: .2 + indice * .1 }} whileHover={{ scale: 1.03 }}>
             <FotoPOI src={scansione.poi.fotoEsclusivaUrl ?? undefined} alt={scansione.poi.nome} className="h-full w-full object-cover" />

@@ -45,6 +45,7 @@ export interface ProfiloUtente {
   qrRaccolti: QRScansionatoDettagliato[];
   streakGiorni: number;
   scontoAttivo: number;
+  totaleScansioni: number;
 }
 
 export interface SogliaSconto {
