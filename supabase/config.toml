@@ -18,7 +18,7 @@ site_url = "http://localhost:5173"
 additional_redirect_urls = ["http://127.0.0.1:5173"]
 
 [functions.scan-poi]
-verify_jwt = true
+verify_jwt = false
 
 [functions.get-rewards-profile]
 verify_jwt = true
